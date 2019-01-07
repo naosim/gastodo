@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+    <style>
+      html {
+        padding: 12px;
+      }
+    </style>
+    <base target="_top">
+    <script>
+    if(!google) {
+      // 開発用ダミーデータ
+      var google = {
+        script: {
+          run: {
+            withSuccessHandler: (callback) => {
+              return {
+                list: () => {
+                  callback(JSON.stringify([{"taskId":1,"scheduledStartDateTime":"2019-01-07T08:30:00.000Z","execTiming":"AM","taskTitle":"朝会","estimateHour":0.5,"startDateTime":"","endDateTime":"","isarchived":""},{"taskId":2,"scheduledStartDateTime":"2019-01-06T15:00:00.000Z","execTiming":"AM","taskTitle":"運用","estimateHour":1,"startDateTime":"","endDateTime":"","isarchived":""},{"taskId":3,"scheduledStartDateTime":"2019-01-07T04:00:00.000Z","execTiming":"PM1","taskTitle":"メンバータスク見る","estimateHour":0.5,"startDateTime":"","endDateTime":"","isarchived":""},{"taskId":4,"scheduledStartDateTime":"2019-01-06T15:00:00.000Z","execTiming":"PM1","taskTitle":"プレゼン考える","estimateHour":0.5,"startDateTime":"","endDateTime":"","isarchived":""},{"taskId":5,"scheduledStartDateTime":"2019-01-06T15:00:00.000Z","execTiming":"PM1","taskTitle":"改善考える","estimateHour":0.5,"startDateTime":"","endDateTime":"","isarchived":""}]));
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  
+    class Sheet {
+      list(callback) {
+        google.script.run.withSuccessHandler((text) => callback(JSON.parse(text))).list();
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <h1>TASK</h1>
+    <h2>TODAY</h2>
+    <div>
+      <table class="pure-table pure-table-bordered">
+        <thead><tr id="todayTaskHeader"></tr></thead>
+        <tbody id="todayTaskBody"></tbody>
+      </table>
+    </div>
+    <h2>ALL</h2>
+    <div>
+      <table class="pure-table pure-table-bordered">
+        <thead><tr id="taskHeader"></tr></thead>
+        <tbody id="taskBody"></tbody>
+      </table>
+    </div>
+    <script src="src/main.ts"></script>
+  </body>
+</html>
+
+
