@@ -117,21 +117,21 @@ class Task {
   schedule: Schedule;
   estimateHour: EstimateHour;
   actual: Actual;
-  isarchived: boolean;
+  isArchived: boolean;
   constructor(
     taskId: TaskId, 
     taskTitle: TaskTitle, 
     schedule: Schedule, 
     estimateHour: EstimateHour, 
     actual: Actual, 
-    isarchived: boolean
+    isArchived: boolean
   ) {
     this.taskId = taskId;
     this.taskTitle = taskTitle;
     this.schedule = schedule;
     this.estimateHour = estimateHour;
     this.actual = actual;
-    this.isarchived = isarchived;
+    this.isArchived = isArchived;
   }
 }
 
@@ -143,7 +143,7 @@ declare class SheetData {
   estimateHour: number;
   startDateTime: string;
   endDateTime: string;
-  isarchived: string;
+  isArchived: string;
 }
 
 class TextTask {
@@ -178,7 +178,7 @@ class TextTask {
     data.estimateHour = parseInt(textTask.est)
     data.startDateTime = textTask.st
     data.endDateTime = textTask.end
-    data.isarchived = textTask.archive
+    data.isArchived = textTask.archive
     */
 
   // static mapping = [
@@ -221,7 +221,7 @@ class TaskConvertor {
       schedule,
       new EstimateHour(v.estimateHour),
       new Actual(actualTermOption),
-      v.isarchived.length > 0
+      v.isArchived.length > 0
     );
   }
 
@@ -234,7 +234,7 @@ class TaskConvertor {
     data.estimateHour = v.estimateHour.value;
     data.startDateTime = v.actual.getActualStartDateTimeOption().map(v => v.value.toISOString()).getOr(() => '');
     data.endDateTime = v.actual.getActualEndDateTimeOption().map(v => v.value.toISOString()).getOr(() => '');
-    data.isarchived = v.isarchived ? 'o' : '';
+    data.isArchived = v.isArchived ? 'o' : '';
     return data;
   }
 
@@ -248,7 +248,7 @@ class TaskConvertor {
     data.estimateHour = parseInt(textTask.est)
     data.startDateTime = textTask.st
     data.endDateTime = textTask.end
-    data.isarchived = textTask.archive
+    data.isArchived = textTask.archive
     return data;
   }
 
@@ -272,7 +272,7 @@ function taskToRow(task:Task, excludeDate = false): string {
   <td>${task.actual.actualHourOption.map(v => '' + v.value).getOr(()=>'')}</td>
   <td>${task.actual.actualTermOption.map(v => v.startDateTime.getTimeText()).getOr(()=>'')}</td>
   <td>${task.actual.actualTermOption.map(v => v.endDateTimeOption.map(w => w.getTimeText()).getOr(()=>'')).getOr(()=>'')}</td>
-  <td>${task.isarchived ? 'archived' : ''}</td>
+  <td>${task.isArchived ? 'archived' : ''}</td>
   </tr>`
 }
 
@@ -309,7 +309,7 @@ new Sheet().list((l) => {
       schedule,
       new EstimateHour(v.estimateHour),
       new Actual(actualTermOption),
-      v.isarchived.length > 0
+      v.isArchived.length > 0
     );
   }).sort((a, b) => {
     return a.schedule.getSortValue() - b.schedule.getSortValue();
