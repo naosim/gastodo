@@ -20,6 +20,14 @@ class ScheduledStartDateTime extends vo.DateVo {
   hasTime() {
     return this.value.getHours() > 0 || this.value.getMinutes() > 0;
   }
+  toGasValue(): string {
+    const d = `${this.value.getFullYear()}/${zerofill(this.value.getMonth() + 1)}/${zerofill(this.value.getDate())}`;
+    if(!this.hasTime()) {
+      return d;
+    }
+    return d + ` ${zerofill(this.value.getHours())}:${zerofill(this.value.getMinutes())}`
+
+  }
 }
 
 class Schedule {
@@ -257,8 +265,111 @@ class TaskConvertor {
   }
 }
 
+/**
+ * 送信前のタスク
+ */
+class PendingTask {
+  taskId: TaskId;
+  taskTitle: TaskTitle;
+  scheduledStartDateTime: ScheduledStartDateTime;
+  execTiming:ExecTiming;
+  estimateHour: EstimateHour;
+
+  constructor(
+    taskId: TaskId, taskTitle: TaskTitle, scheduledStartDateTime: ScheduledStartDateTime, execTiming:ExecTiming, estimateHour: EstimateHour
+  ) {
+    this.taskId = taskId;
+    this.taskTitle = taskTitle;
+    this.scheduledStartDateTime = scheduledStartDateTime;
+    this.execTiming = execTiming;
+    this.estimateHour = estimateHour;
+  }
+
+  toGasValue(): string[] {
+    return [this.taskId.value, this.scheduledStartDateTime.toGasValue(), this.execTiming, this.taskTitle.value, '' + this.estimateHour.value]
+
+  }
+
+}
+
+function getToday(): Date {
+  const d = new Date();
+  d.setHours(0);
+  d.setMinutes(0);
+  d.setSeconds(0);
+  d.setMilliseconds(0);
+  return d;
+}
+
+class TextArg extends vo.StringVo {
+  getType(): TextArgType {
+    if(parseInt(this.value) == NaN) {
+      if(this.value == ExecTiming.AM 
+        || this.value == ExecTiming.PM1
+        || this.value == ExecTiming.PM2
+        || this.value == ExecTiming.OVER) {
+          return TextArgType.execTiming;
+        } else {
+          return TextArgType.text
+        }
+
+    } else {
+      if(this.value.indexOf('.') == -1 && this.value.length == 4) {
+        return TextArgType.schedule;
+      } else {
+        return TextArgType.estimate;
+      }
+
+    }
+  }
+  
+}
+enum TextArgType {
+    schedule, execTiming, estimate, text
+}
+
+//execTiming: ExecTiming
+function createPendingTask(text: String):PendingTask  {
+  const today = getToday();
+  text = text.trim();
+  var args = text.split(' ').map(v => new TextArg(v));
+  var scheduledStartDateTime = new ScheduledStartDateTime(today);
+  var estimateHour: EstimateHour;
+  var execTiming:ExecTiming = ExecTiming.AM;
+  var startIndex = -1;
+  // 1要素目が見積もり
+  const firstType = args[0].getType();
+  if(firstType == TextArgType.estimate) {
+    estimateHour = new EstimateHour(parseInt(args[0].value));
+    startIndex = 1;
+  } else {
+    if(firstType == TextArgType.execTiming) {
+      execTiming = ExecTiming[args[0].value];
+    } else if(firstType == TextArgType.schedule){
+      const d = new Date(`${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()} ${args[0].value.slice(0, 2)}:${args[0].value.slice(2)}`)
+      scheduledStartDateTime = new ScheduledStartDateTime(d);
+    } else {
+      throw new Error("フォーマットエラー");
+    }
+    if(args[1].getType() != TextArgType.estimate) {
+      throw new Error("フォーマットエラー: 2要素目は見積もりにするべき");
+    }
+    estimateHour = new EstimateHour(parseInt(args[1].value));
+    startIndex = 2;
+  }
+  var title = args.slice(startIndex).map(v => v.value).join(' ');
+  return new PendingTask(
+    new TaskId(`T${Date.now()}`),
+    new TaskTitle(title),
+    scheduledStartDateTime,
+    execTiming,
+    estimateHour
+  );
+}
+
 declare class Sheet {
   list(callback:(list:SheetData[])=>void);
+  add(task:PendingTask, callback:(list:SheetData[])=>void);
 }
 
 function taskToRow(task:Task, excludeDate = false): string {
@@ -275,8 +386,8 @@ function taskToRow(task:Task, excludeDate = false): string {
   <td>${task.isArchived ? 'archived' : ''}</td>
   </tr>`
 }
-
-new Sheet().list((l) => {
+var sheet = new Sheet();
+sheet.list((l) => {
   const list = l.map(v => {
     var schedule: Schedule
     const start = new ScheduledStartDateTime(new Date(v.scheduledStartDateTime))
@@ -334,4 +445,11 @@ new Sheet().list((l) => {
     return taskToRow(task);
   }).join('')
   console.log(list);
+})
+
+document.querySelector('#sendTodaysTaskButton').addEventListener('click', () => {
+  var v: any = document.querySelector('#todaysTaskInput');
+  const task = createPendingTask(v.value);
+  console.log(task.toGasValue().join('\t'));
+  sheet.add(task, () => {});
 })

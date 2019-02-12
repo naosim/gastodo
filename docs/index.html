@@ -4,6 +4,9 @@
     <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
     <style>html {
         padding: 12px;
+      }
+      .task-input {
+        width: 300px;
       }</style>
     <base target="_top">
     <script>function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -28,7 +31,7 @@ if (!google) {
                 "estimateHour": 0.5,
                 "startDateTime": "",
                 "endDateTime": "",
-                "isarchived": ""
+                "isArchived": ""
               }, {
                 "taskId": 2,
                 "scheduledStartDateTime": "2019-01-06T15:00:00.000Z",
@@ -37,7 +40,7 @@ if (!google) {
                 "estimateHour": 1,
                 "startDateTime": "",
                 "endDateTime": "",
-                "isarchived": ""
+                "isArchived": ""
               }, {
                 "taskId": 3,
                 "scheduledStartDateTime": "2019-01-07T04:00:00.000Z",
@@ -46,7 +49,7 @@ if (!google) {
                 "estimateHour": 0.5,
                 "startDateTime": "",
                 "endDateTime": "",
-                "isarchived": ""
+                "isArchived": ""
               }, {
                 "taskId": 4,
                 "scheduledStartDateTime": "2019-01-06T15:00:00.000Z",
@@ -55,7 +58,7 @@ if (!google) {
                 "estimateHour": 0.5,
                 "startDateTime": "",
                 "endDateTime": "",
-                "isarchived": ""
+                "isArchived": ""
               }, {
                 "taskId": 5,
                 "scheduledStartDateTime": "2019-01-06T15:00:00.000Z",
@@ -64,8 +67,11 @@ if (!google) {
                 "estimateHour": 0.5,
                 "startDateTime": "",
                 "endDateTime": "",
-                "isarchived": ""
+                "isArchived": ""
               }]));
+            },
+            add: function add() {
+              return callback('ok');
             }
           };
         }
@@ -88,6 +94,17 @@ function () {
         return callback(JSON.parse(text));
       }).list();
     }
+  }, {
+    key: "add",
+    value: function add(pendingTask, callback) {
+      var _this = this;
+
+      google.script.run.withSuccessHandler(function (text) {
+        console.log(text);
+
+        _this.list(callback);
+      }).add(pendingTask.toGasValue());
+    }
   }]);
 
   return Sheet;
@@ -96,6 +113,9 @@ function () {
   <body>
     <h1>TASK</h1>
     <h2>TODAY</h2>
+    今日のタスクに追加: 
+    <input class="task-input" id="todaysTaskInput"><button id="sendTodaysTaskButton">送信</button><br>
+    <pre><code>0930 1 ほげをやる</code></pre>
     <div>
       <table class="pure-table pure-table-bordered">
         <thead><tr id="todayTaskHeader"></tr></thead>
@@ -109,7 +129,7 @@ function () {
         <tbody id="taskBody"></tbody>
       </table>
     </div>
-    <script src="https://naosim.github.io/gastodo/main.e12ea6cc.js"></script>
+    <script src="https://naosim.github.io/gastodo/main.7da74d5d.js"></script>
   </body>
 </html>
 
