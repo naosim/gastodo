@@ -6,6 +6,9 @@
       html {
         padding: 12px;
       }
+      .task-input {
+        width: 300px;
+      }
     </style>
     <base target="_top">
     <script>
@@ -18,7 +21,8 @@
               return {
                 list: () => {
                   callback(JSON.stringify([{"taskId":1,"scheduledStartDateTime":"2019-01-07T08:30:00.000Z","execTiming":"AM","taskTitle":"朝会","estimateHour":0.5,"startDateTime":"","endDateTime":"","isArchived":""},{"taskId":2,"scheduledStartDateTime":"2019-01-06T15:00:00.000Z","execTiming":"AM","taskTitle":"運用","estimateHour":1,"startDateTime":"","endDateTime":"","isArchived":""},{"taskId":3,"scheduledStartDateTime":"2019-01-07T04:00:00.000Z","execTiming":"PM1","taskTitle":"メンバータスク見る","estimateHour":0.5,"startDateTime":"","endDateTime":"","isArchived":""},{"taskId":4,"scheduledStartDateTime":"2019-01-06T15:00:00.000Z","execTiming":"PM1","taskTitle":"プレゼン考える","estimateHour":0.5,"startDateTime":"","endDateTime":"","isArchived":""},{"taskId":5,"scheduledStartDateTime":"2019-01-06T15:00:00.000Z","execTiming":"PM1","taskTitle":"改善考える","estimateHour":0.5,"startDateTime":"","endDateTime":"","isArchived":""}]));
-                }
+                },
+                add:() => callback('ok')
               }
             }
           }
@@ -30,12 +34,22 @@
       list(callback) {
         google.script.run.withSuccessHandler((text) => callback(JSON.parse(text))).list();
       }
+      add(pendingTask, callback) {
+        google.script.run.withSuccessHandler(text => {
+          console.log(text);
+          this.list(callback);
+        }).add(pendingTask.toGasValue());
+        
+      }
     }
     </script>
   </head>
   <body>
     <h1>TASK</h1>
     <h2>TODAY</h2>
+    今日のタスクに追加: 
+    <input class="task-input" id="todaysTaskInput" /><button id="sendTodaysTaskButton">送信</button><br>
+    <pre><code>0930 1 ほげをやる</code></pre>
     <div>
       <table class="pure-table pure-table-bordered">
         <thead><tr id="todayTaskHeader"></tr></thead>
